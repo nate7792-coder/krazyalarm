@@ -1,0 +1,57 @@
+name: KrazyAlarm macOS Build Check
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unsigned-ios-build:
+    name: Unsigned iOS simulator build
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Show Apple toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcodebuild -showsdks
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Confirm generated scheme
+        run: xcodebuild -project KrazyAlarm.xcodeproj -list
+
+      - name: Build without signing
+        run: |
+          set -o pipefail
+          xcodebuild clean build \
+            -project KrazyAlarm.xcodeproj \
+            -scheme KrazyAlarm \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            | tee xcodebuild.log
+
+      - name: Save build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KrazyAlarm-xcodebuild-log
+          path: xcodebuild.log
+          if-no-files-found: warn
+          retention-days: 14

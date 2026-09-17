@@ -1,0 +1,49 @@
+name: KrazyAlarm
+options:
+  bundleIdPrefix: com.nathanbarber
+  deploymentTarget:
+    iOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+targets:
+  KrazyAlarm:
+    type: application
+    platform: iOS
+    sources:
+      - path: KrazyAlarm
+      - path: Shared
+    resources:
+      - path: KrazyAlarm/Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nathanbarber.KrazyAlarm
+        INFOPLIST_FILE: KrazyAlarm/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - target: KrazyAlarmWidgets
+        embed: true
+  KrazyAlarmWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KrazyAlarmWidgets
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nathanbarber.KrazyAlarm.widgets
+        INFOPLIST_FILE: KrazyAlarmWidgets/Info.plist
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+
+schemes:
+  KrazyAlarm:
+    build:
+      targets:
+        KrazyAlarm: all
+        KrazyAlarmWidgets: all
+    run:
+      config: Debug
