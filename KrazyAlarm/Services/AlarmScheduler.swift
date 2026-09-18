@@ -4,13 +4,11 @@ import SwiftUI
 
 @MainActor
 final class AlarmScheduler {
-    private let manager = AlarmManager.shared
-
     func requestAuthorization() async throws -> AlarmManager.AuthorizationState {
-        if manager.authorizationState == .notDetermined {
-            return try await manager.requestAuthorization()
+        if AlarmManager.shared.authorizationState == .notDetermined {
+            return try await AlarmManager.shared.requestAuthorization()
         }
-        return manager.authorizationState
+        return AlarmManager.shared.authorizationState
     }
 
     func schedule(_ profile: AlarmProfile) async throws {
@@ -19,7 +17,7 @@ final class AlarmScheduler {
             throw SchedulerError.notAuthorized
         }
 
-        try? manager.cancel(id: profile.id)
+        try? AlarmManager.shared.cancel(id: profile.id)
 
         let time = Alarm.Schedule.Relative.Time(hour: profile.hour, minute: profile.minute)
         let recurrence = Alarm.Schedule.Relative.Recurrence.weekly(weekdays(for: profile.repeatMode))
@@ -57,11 +55,11 @@ final class AlarmScheduler {
             sound: sound
         )
 
-        _ = try await manager.schedule(id: profile.id, configuration: configuration)
+        _ = try await AlarmManager.shared.schedule(id: profile.id, configuration: configuration)
     }
 
     func cancel(_ id: UUID) throws {
-        try manager.cancel(id: id)
+        try AlarmManager.shared.cancel(id: id)
     }
 
     private func weekdays(for mode: RepeatMode) -> [Locale.Weekday] {
